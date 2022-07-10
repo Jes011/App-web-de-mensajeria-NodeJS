@@ -16,13 +16,29 @@ function getMessageList() {
         const messages = store.getMessageList();
         if (messages) {
             resolve(messages);
-        }else{
+        } else {
             reject('No hay elementos en la lista')
         }
     });
 }
 
+function updateMessage(id, message) {
+    return new Promise(async (resolve, reject) => {
+        if (!id || !message) {
+            reject('argumentos invalidos')
+        } else {
+            const foundMessage = await store.updateMessage(id,message);
+
+            if (!foundMessage) {
+                reject('id de mensaje no encontrado');
+            } else {
+                resolve(foundMessage);
+            }
+        }
+    });
+};
 module.exports = {
     addMessage,
-    getMessageList
+    getMessageList,
+    updateMessage
 };

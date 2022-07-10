@@ -24,9 +24,13 @@ router.post('/', (req, res) => {
         });
 });
 
-router.patch('/:id',(req,res)=>{
-    console.log(req.params.id);
-    res.send();
+router.patch('/:id', (req, res) => {
+    controller.updateMessage(req.params.id, req.body.message)
+        .then((infoMessage)=>{
+            response(req,res,{Status:'Mensaje editado correctamente',infoMessage},200)
+        }).catch((err)=>{
+            response(req,res,{Status:'Error '+err},400);
+        });
 })
 
 module.exports = router;
