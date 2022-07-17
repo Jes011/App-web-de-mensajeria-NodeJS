@@ -1,20 +1,29 @@
-const db = require('mongoose');
 const Model = require('./model');
-
-db.Promise = global.Promise;
-db.connect('mongodb+srv://pepe:contraseña123@cluster0.cbkvn6f.mongodb.net/?retryWrites=true&w=majority', {
-    useNewUrlParser: true
-});
 
 const addMessage = (message) => {
     const myMSG = new Model(message);
     myMSG.save();
 }
 
-const getMessageList = async () => {
-    const messages = await Model.find();
-    return messages;
+const getMessageList = (name) => {
+
+    return new Promise((resolve, reject) => {
+        let query = {};
+        if (name) {
+            query = { name: name };
+        }
+
+        Model.find(query).populate('name').exec((err, data) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(data);
+            }
+        });
+    }
+    )
 }
+
 
 const updateMessage = async (id, message) => {
     let foundMessage = await Model.findOne({ _id: id });
@@ -24,12 +33,17 @@ const updateMessage = async (id, message) => {
         foundMessage = await foundMessage.save();
     }
 
-    
+
     return foundMessage;
+}
+
+const deleteMessage = (id) => {
+    return Model.deleteOne({ _id: id });
 }
 
 module.exports = {
     addMessage,
     getMessageList,
-    updateMessage
+    updateMessage,
+    deleteMessage
 }

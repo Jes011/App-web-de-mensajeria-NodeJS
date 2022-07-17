@@ -3,17 +3,21 @@ const express = require('express');
 const response = require('../../network/response');
 const controller = require('./controller');
 const router = express.Router();
+const multer = require('multer');
+const upload = multer({
+    dest:'public/files/'
+})
 
 
 router.get('/', (req, res) => {
-    controller.getMessageList()
+    controller.getMessageList(req.query.name)
         .then(mess => res.send(mess))
         .catch(err => res.send(err));
 });
 
-router.post('/', (req, res) => {
+router.post('/',upload.single('file'),(req, res) => {
     console.log('one more');
-    controller.addMessage(req.body.name, req.body.menssage)
+    controller.addMessage(req.body.name, req.body.menssage, req.body.chat, req.file)
         .then(resp => {
             console.log(resp);
             response(req, res, { Status: 'Mensaje enviado correctamente', resp }, 201);
@@ -31,6 +35,16 @@ router.patch('/:id', (req, res) => {
         }).catch((err)=>{
             response(req,res,{Status:'Error '+err},400);
         });
-})
+});
+
+router.delete('/:id',(req,res)=>{
+    controller.deleteMessage(req.params.id)
+    .then((mess)=>{
+        response(req,res,{Status:mess},200);
+    })
+    .catch((err)=>{
+        response(req,res,{Status: `Error ${err}`},400)
+    });
+});
 
 module.exports = router;

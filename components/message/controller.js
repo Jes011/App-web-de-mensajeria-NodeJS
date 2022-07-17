@@ -1,9 +1,10 @@
 const store = require('./store')
 
-function addMessage(user, message) {
+function addMessage(user, message,chat,file) {
     return new Promise((resolve, reject) => {
-        if (user && message) {
-            store.addMessage({ name: user, message: message, date: new Date() });
+        if (user && message && chat) {
+            console.log(file);
+            store.addMessage({ name: user,chat:chat, message: message, date: new Date(),file:(file)?`localhost:1853/files/${file.filename}`:''});
             resolve('Mensaje agregado con exito')
         } else {
             reject('Error Menssage incompleto');
@@ -11,14 +12,9 @@ function addMessage(user, message) {
     })
 }
 
-function getMessageList() {
+function getMessageList(name) {
     return new Promise((resolve, reject) => {
-        const messages = store.getMessageList();
-        if (messages) {
-            resolve(messages);
-        } else {
-            reject('No hay elementos en la lista')
-        }
+        store.getMessageList(name).then(mess=>resolve(mess)).catch(err=>reject(err));
     });
 }
 
@@ -27,7 +23,7 @@ function updateMessage(id, message) {
         if (!id || !message) {
             reject('argumentos invalidos')
         } else {
-            const foundMessage = await store.updateMessage(id,message);
+            const foundMessage = await store.updateMessage(id, message);
 
             if (!foundMessage) {
                 reject('id de mensaje no encontrado');
@@ -37,8 +33,27 @@ function updateMessage(id, message) {
         }
     });
 };
+
+function deleteMessage(id) {
+    return new Promise((resolve, reject) => {
+
+        if (id) {
+            store.deleteMessage(id).then((mess) => {
+                if(mess.deletedCount!=1){
+                    reject('mensaje no existente')
+                }else{
+                    resolve('mensaje eliminado')
+                }
+            }).catch(() => reject('error'))
+        } else {
+            reject('error id invalido')
+        }
+    })
+}
+
 module.exports = {
     addMessage,
     getMessageList,
-    updateMessage
+    updateMessage,
+    deleteMessage
 };
